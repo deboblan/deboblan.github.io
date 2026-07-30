@@ -1,1 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Investigasi — Rute KM Arwana 88</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<style>
+  :root{
+    --cream:#F3F0E7;
+    --cream-2:#ECE7D9;
+    --navy:#152238;
+    --navy-soft:#4C5F82;
+    --gold:#B08A4E;
+    --gold-light:#D9BE8E;
+    --line:#D9D2BF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;font-family:'Inter',sans-serif;color:var(--navy);background:var(--cream);}
 
+  .app{ display:flex; flex-direction:column; height:100%; }
+
+  header{
+    padding:22px 5vw 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--cream);
+    text-align:center;
+    flex:0 0 auto;
+  }
+  .kicker{
+    font-size:11px; letter-spacing:0.3em; font-weight:600;
+    color:var(--gold); text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(20px,3vw,28px);
+    margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .sub{ font-size:12.5px; color:var(--navy-soft); max-width:560px; margin:0 auto; }
+
+  .map-wrap{ position:relative; flex:1 1 auto; min-height:0; }
+  #map{ position:absolute; inset:0; }
+
+  .legend{
+    position:absolute; left:16px; bottom:16px; z-index:5;
+    background:rgba(255,255,255,0.95);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:12px 14px;
+    font-size:11px;
+    color:var(--navy-soft);
+    box-shadow:0 8px 20px -10px rgba(21,34,56,0.3);
+    max-width:220px;
+  }
+  .legend strong{ display:block; font-family:'Fraunces',serif; font-size:12.5px; color:var(--navy); margin-bottom:6px; }
+  .legend .row{ display:flex; align-items:center; gap:8px; margin-top:5px; }
+  .legend .dot{ width:9px;height:9px;border-radius:50%; background:var(--gold); border:2px solid #fff; box-shadow:0 0 0 1px var(--gold); flex:0 0 auto; }
+  .legend .dashline{ width:16px; height:0; border-top:2px dashed var(--gold-light); flex:0 0 auto; }
+
+  .hint{
+    position:absolute; right:16px; top:16px; z-index:5;
+    background:rgba(255,255,255,0.95);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:11px;
+    color:var(--navy-soft);
+    box-shadow:0 8px 20px -10px rgba(21,34,56,0.3);
+  }
+
+  /* popup styling */
+  .maplibregl-popup-content{
+    padding:0;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 18px 40px -16px rgba(21,34,56,0.45);
+    border:1px solid var(--line);
+  }
+  .maplibregl-popup-close-button{
+    font-size:18px; color:#fff; padding:4px 8px; right:2px; top:2px;
+  }
+  .pop{ width:280px; font-family:'Inter',sans-serif; }
+  .pop-head{
+    background:var(--navy);
+    color:var(--cream);
+    padding:14px 16px 12px;
+  }
+  .pop-idx{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+    font-size:11px; color:var(--gold-light); letter-spacing:0.05em; display:block; margin-bottom:4px;
+  }
+  .pop-date{
+    font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px;
+  }
+  .pop-title{
+    font-family:'Fraunces',serif; font-weight:700; font-size:16px; line-height:1.25; margin:0;
+  }
+  .pop-body{ padding:14px 16px 16px; background:#fff; }
+  .pop-desc{ font-size:12.5px; line-height:1.6; color:var(--navy-soft); margin:0 0 10px; }
+  .pop-coord{
+    font-size:10px; color:var(--gold); letter-spacing:0.03em;
+    border-top:1px dashed var(--line); padding-top:8px; margin-top:4px;
+  }
+
+  .marker{
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .marker-inner{
+    width:14px; height:14px; border-radius:50%;
+    background:var(--gold);
+    border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--gold), 0 6px 14px -4px rgba(21,34,56,0.5);
+    transition:transform .15s ease;
+  }
+  .marker:hover .marker-inner{ transform:scale(1.25); }
+  .marker-num{
+    position:absolute;
+    font-size:9px; font-weight:700; color:var(--navy);
+    font-family:'Inter',sans-serif;
+    transform:translateY(-24px);
+    background:#fff;
+    border:1px solid var(--gold-light);
+    border-radius:3px;
+    padding:1px 4px;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+
+  @media (max-width:640px){
+    .legend{ max-width:170px; font-size:10px; padding:10px 12px; }
+    .hint{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="kicker">Kasus Fiktif &mdash; Rekonstruksi Rute</div>
+    <h1>Jejak Laut KM Arwana 88</h1>
+    <p class="sub">Klik setiap titik untuk melihat detail kejadian. Seluruh koordinat bersifat fiktif, digambarkan di sekitar perairan Kepulauan Aru sebagai ilustrasi rute investigasi.</p>
+  </header>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="hint">Klik titik pada peta &rarr;</div>
+    <div class="legend">
+      <strong>Legenda</strong>
+      <div class="row"><span class="dot"></span> Titik kejadian (klik untuk detail)</div>
+      <div class="row"><span class="dashline"></span> Rute pergerakan kapal</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const events = [
+  {
+    date:"3 Jan 2027",
+    title:"Kapal Berangkat",
+    desc:"KM Arwana 88 meninggalkan pelabuhan kecil di Kabupaten Kepulauan Aru membawa 27 awak dan pukat yang disembunyikan di bawah terpal.",
+    coord:[134.15, -6.05]
+  },
+  {
+    date:"5 Jan 2027",
+    title:"Sinyal VMS Dimatikan",
+    desc:"Posisi terakhir sebelum sistem pelacakan (VMS) dimatikan atas dugaan perintah nakhoda — sekitar 45 mil laut dari Kepulauan Aru.",
+    coord:[134.55, -6.32]
+  },
+  {
+    date:"7–12 Jan 2027",
+    title:"Zona Terlarang",
+    desc:"Kapal menurunkan pukat setiap malam di wilayah yang ditetapkan sebagai zona perlindungan ikan muda, menangkap lebih dari 110 ton ikan.",
+    coord:[134.88, -6.58]
+  },
+  {
+    date:"10 Jan 2027",
+    title:"Kekerasan Terhadap Awak",
+    desc:"Awak kapal bernama samaran Fajar dipukul dan dikurung setelah meminta dipulangkan karena terluka; telepon genggam awak disita.",
+    coord:[134.97, -6.63]
+  },
+  {
+    date:"13 Jan 2027",
+    title:"Transshipment",
+    desc:"Sekitar 80 ton hasil tangkapan dipindahkan ke kapal asing MV Northern Star di luar jalur pelayaran umum, senilai ±Rp14,8 miliar.",
+    coord:[135.35, -6.92]
+  },
+  {
+    date:"14 Jan 2027",
+    title:"VMS Aktif Kembali",
+    desc:"Sinyal pelacakan menyala kembali sekitar 120 mil laut dari posisi terakhir sebelum menghilang — laporan hasil tangkapan yang dikirim jauh lebih kecil dari kenyataan.",
+    coord:[135.95, -7.42]
+  },
+  {
+    date:"18 Jan 2027",
+    title:"Bocor ke Jurnalis",
+    desc:"Mendekati wilayah berjaringan seluler, awak kapal Rian mengirimkan video bukti kepada kakaknya, yang diteruskan ke media Suara Bahari.",
+    coord:[134.35, -6.18]
+  },
+  {
+    date:"22 Jan 2027",
+    title:"Penangkapan Kapal",
+    desc:"Kapal patroli pemerintah menahan KM Arwana 88 sekitar 70 mil laut di sebelah barat Kepulauan Aru setelah pengejaran hampir dua jam.",
+    coord:[133.35, -6.02]
+  }
+];
+
+const bounds = [[132.6, -8.2],[136.6, -5.4]];
+
+const map = new maplibregl.Map({
+  container:'map',
+  style:{
+    version:8,
+    sources:{
+      osm:{
+        type:'raster',
+        tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tileSize:256,
+        attribution:'&copy; OpenStreetMap contributors'
+      }
+    },
+    layers:[
+      { id:'osm', type:'raster', source:'osm' },
+    ]
+  },
+  center:[134.6,-6.5],
+  zoom:6.4,
+  maxBounds:[[130,-10],[139,-3]]
+});
+
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+map.on('load', ()=>{
+  // route line connecting events in chronological order
+  map.addSource('route', {
+    type:'geojson',
+    data:{
+      type:'Feature',
+      geometry:{
+        type:'LineString',
+        coordinates: events.map(e=>e.coord)
+      }
+    }
+  });
+  map.addLayer({
+    id:'route-line',
+    type:'line',
+    source:'route',
+    paint:{
+      'line-color':'#D9BE8E',
+      'line-width':2.5,
+      'line-dasharray':[2,2]
+    }
+  });
+
+  events.forEach((e,i)=>{
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.innerHTML = `<div class="marker-inner"></div><div class="marker-num">N&#176;${i+1}</div>`;
+
+    const popupHTML = `
+      <div class="pop">
+        <div class="pop-head">
+          <span class="pop-idx">N&#176;${String(i+1).padStart(2,'0')}</span>
+          <div class="pop-date">${e.date}</div>
+          <p class="pop-title">${e.title}</p>
+        </div>
+        <div class="pop-body">
+          <p class="pop-desc">${e.desc}</p>
+          <div class="pop-coord">${Math.abs(e.coord[1]).toFixed(2)}&deg;S, ${e.coord[0].toFixed(2)}&deg;E (fiktif)</div>
+        </div>
+      </div>`;
+
+    const popup = new maplibregl.Popup({ offset:18, maxWidth:'300px' }).setHTML(popupHTML);
+
+    new maplibregl.Marker({ element: el })
+      .setLngLat(e.coord)
+      .setPopup(popup)
+      .addTo(map);
+  });
+
+  map.fitBounds(bounds, { padding:60, duration:0 });
+});
+</script>
+</body>
+</html>
