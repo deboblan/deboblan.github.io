@@ -1,1 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Global Egg Ledger — Egg Prices vs. Minimum Wage, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #15130f;
+    --panel: #1c1a15;
+    --panel-2: #211f19;
+    --line: #34302a;
+    --ink: #f1ece1;
+    --ink-dim: #a89f8e;
+    --ink-faint: #6f6858;
+    --yolk: #f2a93b;
+    --yolk-dim: #7a5a26;
 
+    --c-europe: #6b9080;
+    --c-asia: #4d7ea8;
+    --c-africa: #d4a017;
+    --c-namerica: #a65b72;
+    --c-samerica: #2e9081;
+    --c-oceania: #8367c7;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  ::selection{ background: var(--yolk); color: #15130f; }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 28px 90px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--yolk);
+    margin: 0 0 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    display:inline-block;
+    width:9px; height:9px;
+    border-radius: 50%;
+    background: var(--yolk);
+    box-shadow: 0 0 0 3px rgba(242,169,59,0.18);
+  }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(32px, 4.4vw, 52px);
+    line-height: 1.03;
+    margin: 0 0 12px;
+    max-width: 720px;
+    letter-spacing: -0.01em;
+  }
+  h1 em{
+    font-style: italic;
+    color: var(--yolk);
+    font-weight: 500;
+  }
+
+  .sub{
+    color: var(--ink-dim);
+    font-size: 13.5px;
+    line-height: 1.6;
+    max-width: 520px;
+    margin: 0;
+  }
+
+  .stat-block{
+    display:flex;
+    gap: 26px;
+    flex-shrink: 0;
+  }
+  .stat{
+    text-align: right;
+  }
+  .stat .num{
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    display:block;
+  }
+  .stat .lbl{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
+  }
+
+  .ctrl-group{
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ctrl-group .label{
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .seg{
+    display:flex;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button{
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--ink-dim);
+    background: transparent;
+    border: none;
+    padding: 8px 13px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+    white-space: nowrap;
+  }
+  .seg button:hover{ color: var(--ink); }
+  .seg button.active{
+    background: var(--yolk);
+    color: #1a1508;
+    font-weight: 600;
+  }
+
+  .dir-toggle{
+    display:flex; align-items:center; gap: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink-dim);
+    user-select: none;
+  }
+  .dir-toggle:hover{ color: var(--ink); border-color: #454038; }
+  .dir-toggle .arrow{ color: var(--yolk); font-size: 14px; transition: transform .2s ease; }
+  .dir-toggle.desc .arrow{ transform: rotate(180deg); }
+
+  .chips{
+    display:flex; flex-wrap: wrap; gap: 6px;
+    max-width: 460px;
+  }
+  .chip{
+    font-family: inherit;
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 6px 12px 6px 9px;
+    cursor: pointer;
+    display:flex; align-items:center; gap: 6px;
+    transition: all .15s ease;
+  }
+  .chip .dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .chip.off{ opacity: 0.38; }
+  .chip:hover{ border-color: #524b3f; }
+
+  .search-box{
+    position: relative;
+  }
+  .search-box input{
+    font-family: inherit;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink);
+    font-size: 12.5px;
+    padding: 9px 12px 9px 30px;
+    width: 190px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .search-box input:focus{ border-color: var(--yolk-dim); }
+  .search-box input::placeholder{ color: var(--ink-faint); }
+  .search-box::before{
+    content: "⌕";
+    position: absolute;
+    left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+
+  /* ---------- Chart ---------- */
+  .chart-panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 10px;
+  }
+
+  .axis-label{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+    padding-left: 178px;
+  }
+
+  .rows{ display:flex; flex-direction: column; }
+
+  .row{
+    display: grid;
+    grid-template-columns: 26px 130px 1fr 96px;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    position: relative;
+  }
+  .row.hidden{ display:none; }
+
+  .rank{
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+  }
+
+  .country{
+    display:flex; align-items:center; gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink);
+    overflow:hidden;
+  }
+  .country .dot{
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .country .name{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-track{
+    position: relative;
+    height: 22px;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill{
+    position: absolute;
+    left:0; top:0; bottom:0;
+    border-radius: 4px;
+    transition: width .5s cubic-bezier(.22,.9,.3,1), opacity .2s ease;
+  }
+  .row:hover .bar-fill{ filter: brightness(1.2); }
+
+  .value{
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .row:hover .value{ color: var(--yolk); }
+
+  /* tooltip */
+  .tip{
+    position: fixed;
+    pointer-events: none;
+    background: #0f0d0a;
+    border: 1px solid var(--yolk-dim);
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-size: 11.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .12s ease, transform .12s ease;
+    max-width: 240px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .tip.show{ opacity: 1; transform: translateY(0); }
+  .tip b{ color: var(--yolk); font-weight: 600; }
+  .tip .tip-row{ display:flex; justify-content: space-between; gap: 14px; color: var(--ink-dim); }
+  .tip .tip-row span:last-child{ color: var(--ink); }
+
+  .empty-msg{
+    text-align:center;
+    padding: 40px 0;
+    color: var(--ink-faint);
+    font-size: 13px;
+    display:none;
+  }
+
+  footer{
+    margin-top: 26px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    line-height: 1.7;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  footer a{ color: var(--ink-dim); }
+
+  @media (max-width: 640px){
+    .row{ grid-template-columns: 20px 92px 1fr 74px; }
+    .axis-label{ padding-left: 122px; }
+    .controls{ flex-direction: column; align-items: stretch; }
+    .search-box input{ width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">79 countries · Jan 2026 pricing</p>
+      <h1>What a dozen eggs<br>costs against <em>an hour's floor.</em></h1>
+      <p class="sub">Egg prices and minimum-wage floors, country by country. Sort by wage, by egg price, or by how many dozens that wage actually buys — grouped by continent.</p>
+    </div>
+    <div class="stat-block">
+      <div class="stat"><span class="num">$3.33</span><span class="lbl">avg egg price</span></div>
+      <div class="stat"><span class="num">$975</span><span class="lbl">avg min. wage</span></div>
+      <div class="stat"><span class="num">79</span><span class="lbl">countries</span></div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <span class="label">Sort by</span>
+      <div class="seg" id="sortSeg">
+        <button data-sort="minWage" class="active">Minimum Wage</button>
+        <button data-sort="eggPrice">Egg Price</button>
+        <button data-sort="buyingPower">Egg Buying Power</button>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="label">Direction</span>
+      <div class="dir-toggle desc" id="dirToggle">
+        <span class="arrow">↓</span><span id="dirLabel">Highest first</span>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="label">Continents</span>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="label">Search</span>
+      <div class="search-box">
+        <input type="text" id="search" placeholder="Find a country…">
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="axis-label" id="axisLabel">Minimum wage — USD / month</div>
+    <div class="rows" id="rows"></div>
+    <div class="empty-msg" id="emptyMsg">No countries match your filters.</div>
+  </div>
+
+  <footer>
+    Sources: Egg prices — GlobalProductPrices.com (Jan 2026). Minimum wages — WageIndicator, WorldPopulationReview, Deel, Playroll, Employsome, CXC Global, Mauve Group, Remotepeople, hellopebl, wage.is, Eurofound, Arbeidstilsynet, Geneva LIRT, Uruguay MTSS, Singapore MoM, Bloomberg Tax (2025–2026). "CBA/Sector floor" entries are estimated collective-bargaining averages for countries with no statutory national minimum. "Egg buying power" = dozens of eggs one month's minimum wage can purchase at local egg prices.
+  </footer>
+
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const CONTINENT_COLORS = {
+  "Europe": "#6b9080",
+  "Asia": "#4d7ea8",
+  "Africa": "#d4a017",
+  "North America": "#a65b72",
+  "South America": "#2e9081",
+  "Oceania": "#8367c7"
+};
+
+// rank, country, continent, eggPrice (USD/dozen), minWage (USD/month), wageStatus, buyingPower (dozens/month), daysForDozen, wageTier
+const DATA = [
+["Switzerland","Europe",8.12,4675.00,"CBA/Sector floor",575.7,0.04,"High"],
+["Norway","Europe",7.18,1869.00,"CBA/Sector floor",260.3,0.08,"Medium"],
+["Australia","Oceania",7.18,2691.00,"Statutory",374.8,0.06,"High"],
+["New Zealand","Oceania",7.06,2316.00,"Statutory",328.0,0.07,"High"],
+["Uruguay","South America",6.25,605.00,"Statutory",96.8,0.22,"Low"],
+["Czechia","Europe",5.17,1094.90,"Statutory",211.8,0.10,"Medium"],
+["Sweden","Europe",5.04,2439.00,"CBA/Sector floor",483.9,0.04,"High"],
+["Belgium","Europe",5.02,2502.60,"Statutory",498.5,0.04,"High"],
+["Denmark","Europe",4.91,2250.00,"CBA/Sector floor",458.2,0.05,"High"],
+["Austria","Europe",4.90,1651.00,"CBA/Sector floor",336.9,0.06,"Medium"],
+["UK","Europe",4.87,2849.00,"Statutory",585.0,0.04,"High"],
+["Ireland","Europe",4.78,2879.50,"Statutory",602.4,0.04,"High"],
+["Hong Kong","Asia",4.71,530.00,"Statutory",112.5,0.19,"Low"],
+["Italy","Europe",4.65,1470.00,"CBA/Sector floor",316.1,0.07,"Medium"],
+["Germany","Europe",4.62,2829.40,"Statutory",612.4,0.04,"High"],
+["USA","North America",4.62,1256.20,"Statutory",271.9,0.08,"Medium"],
+["Greece","Europe",4.57,1216.90,"Statutory",266.3,0.08,"Medium"],
+["Israel","Asia",4.47,1680.20,"Statutory",375.9,0.06,"Medium"],
+["Ghana","Africa",4.46,32.00,"Statutory",7.2,3.02,"Minimal"],
+["France","Europe",4.27,2160.10,"Statutory",505.9,0.04,"High"],
+["Slovakia","Europe",4.20,1084.20,"Statutory",258.1,0.08,"Medium"],
+["Lithuania","Europe",4.20,1366.20,"Statutory",325.3,0.07,"Medium"],
+["Latvia","Europe",4.06,924.30,"Statutory",227.7,0.10,"Low"],
+["Romania","Europe",4.04,942.00,"Statutory",233.2,0.09,"Low"],
+["Poland","Europe",3.96,1349.60,"Statutory",340.8,0.06,"Medium"],
+["Chile","South America",3.96,555.50,"Statutory",140.3,0.15,"Low"],
+["Finland","Europe",3.82,1613.00,"CBA/Sector floor",422.3,0.05,"Medium"],
+["Spain","Europe",3.80,1636.40,"Statutory",430.6,0.05,"Medium"],
+["Hungary","Europe",3.80,993.00,"Statutory",261.3,0.08,"Low"],
+["Portugal","Europe",3.61,1271.40,"Statutory",352.2,0.06,"Medium"],
+["Puerto Rico","North America",3.58,1680.00,"Statutory",469.3,0.05,"Medium"],
+["Morocco","Africa",3.51,332.50,"Statutory",94.7,0.23,"Low"],
+["Netherlands","Europe",3.45,2249.00,"Statutory",651.9,0.03,"High"],
+["Croatia","Europe",3.44,1244.20,"Statutory",361.7,0.06,"Medium"],
+["South Africa","Africa",3.20,268.80,"Statutory",84.0,0.26,"Very Low"],
+["Mexico","North America",3.16,330.00,"Statutory",104.4,0.21,"Low"],
+["South Korea","Asia",3.04,1182.00,"Statutory",388.8,0.06,"Medium"],
+["Japan","Asia",2.96,1244.70,"Statutory",420.5,0.05,"Medium"],
+["Slovenia","Europe",2.93,1514.30,"Statutory",516.8,0.04,"Medium"],
+["Canada","North America",2.89,2191.60,"Statutory",758.3,0.03,"High"],
+["Colombia","South America",2.73,384.40,"Statutory",140.8,0.15,"Low"],
+["UA Emirates","Asia",2.72,1634.00,"Statutory",600.7,0.04,"Medium"],
+["Ivory Coast","Africa",2.71,124.20,"Statutory",45.8,0.47,"Very Low"],
+["Singapore","Asia",2.68,1415.00,"CBA/Sector floor",528.0,0.04,"Medium"],
+["Nigeria","Africa",2.66,45.50,"Statutory",17.1,1.27,"Minimal"],
+["Malaysia","Asia",2.60,430.50,"Statutory",165.6,0.13,"Low"],
+["Serbia","Europe",2.57,881.60,"Statutory",343.0,0.06,"Low"],
+["Thailand","Asia",2.54,252.60,"Statutory",99.4,0.22,"Very Low"],
+["Jordan","Asia",2.54,409.00,"Statutory",161.0,0.13,"Low"],
+["Peru","South America",2.49,331.80,"Statutory",133.3,0.16,"Low"],
+["Turkey","Asia",2.47,759.40,"Statutory",307.4,0.07,"Low"],
+["Brazil","South America",2.42,303.80,"Statutory",125.5,0.17,"Low"],
+["Tanzania","Africa",2.37,32.00,"Statutory",13.5,1.60,"Minimal"],
+["Saudi Arabia","Asia",2.34,1067.00,"Statutory",456.0,0.05,"Medium"],
+["Ecuador","South America",2.33,482.00,"Statutory",206.9,0.10,"Low"],
+["Cameroon","Africa",2.32,60.10,"Statutory",25.9,0.84,"Minimal"],
+["China","Asia",2.28,391.70,"Statutory",171.8,0.13,"Low"],
+["Philippines","Asia",2.23,254.60,"Statutory",114.2,0.19,"Very Low"],
+["Russia","Europe",2.21,242.50,"Statutory",109.7,0.20,"Very Low"],
+["Kuwait","Asia",2.21,195.40,"Statutory",88.4,0.25,"Very Low"],
+["Ukraine","Europe",2.10,202.90,"Statutory",96.6,0.22,"Very Low"],
+["Vietnam","Asia",2.10,212.40,"Statutory",101.1,0.21,"Very Low"],
+["Paraguay","South America",2.09,405.90,"Statutory",194.2,0.11,"Low"],
+["Tunisia","Africa",2.01,149.00,"Statutory",74.1,0.29,"Very Low"],
+["Dominican Republic","North America",2.01,269.90,"Statutory",134.3,0.16,"Very Low"],
+["Costa Rica","North America",1.94,726.00,"Statutory",374.2,0.06,"Low"],
+["India","Asia",1.89,43.20,"Statutory",22.9,0.95,"Minimal"],
+["Kenya","Africa",1.89,116.90,"Statutory",61.9,0.35,"Very Low"],
+["Guatemala","North America",1.89,513.10,"Statutory",271.5,0.08,"Low"],
+["Uganda","Africa",1.83,35.10,"Statutory",19.2,1.13,"Minimal"],
+["Bolivia","South America",1.81,469.00,"Statutory",259.1,0.08,"Low"],
+["Kazakhstan","Asia",1.80,161.50,"Statutory",89.7,0.24,"Very Low"],
+["Azerbaijan","Asia",1.80,235.30,"Statutory",130.7,0.17,"Very Low"],
+["Indonesia","Asia",1.79,343.80,"Statutory",192.1,0.11,"Low"],
+["Zambia","Africa",1.77,52.80,"Statutory",29.8,0.73,"Minimal"],
+["Sri Lanka","Asia",1.69,56.50,"Statutory",33.4,0.65,"Minimal"],
+["Egypt","Africa",1.57,146.70,"Statutory",93.4,0.23,"Very Low"],
+["Bangladesh","Asia",1.55,101.50,"Statutory",65.5,0.33,"Very Low"],
+["Pakistan","Asia",1.40,129.90,"Statutory",92.8,0.23,"Very Low"]
+].map((d,i) => ({
+  rank: i+1,
+  country: d[0], continent: d[1], eggPrice: d[2], minWage: d[3],
+  wageStatus: d[4], buyingPower: d[5], daysForDozen: d[6], wageTier: d[7]
+}));
+
+const METRICS = {
+  minWage:     { label: "Minimum wage — USD / month",             key: "minWage",     fmt: v => "$" + v.toLocaleString(undefined,{maximumFractionDigits:0}) },
+  eggPrice:    { label: "Egg price — USD / dozen",                 key: "eggPrice",    fmt: v => "$" + v.toFixed(2) },
+  buyingPower: { label: "Egg buying power — dozens / month wage",  key: "buyingPower", fmt: v => v.toLocaleString(undefined,{maximumFractionDigits:0}) + " dz" }
+};
+
+let state = {
+  sort: "minWage",
+  dir: "desc",
+  continents: new Set(Object.keys(CONTINENT_COLORS)),
+  query: ""
+};
+
+const rowsEl = document.getElementById("rows");
+const emptyMsg = document.getElementById("emptyMsg");
+const tip = document.getElementById("tip");
+const axisLabel = document.getElementById("axisLabel");
+
+function buildChips(){
+  const chipsEl = document.getElementById("chips");
+  chipsEl.innerHTML = "";
+  Object.keys(CONTINENT_COLORS).forEach(cont => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.innerHTML = `<span class="dot" style="background:${CONTINENT_COLORS[cont]}"></span>${cont}`;
+    chip.addEventListener("click", () => {
+      if(state.continents.has(cont)) state.continents.delete(cont);
+      else state.continents.add(cont);
+      render();
+    });
+    chip.dataset.cont = cont;
+    chipsEl.appendChild(chip);
+  });
+}
+
+function render(){
+  const metric = METRICS[state.sort];
+  axisLabel.textContent = metric.label;
+
+  document.querySelectorAll("#chips .chip").forEach(c => {
+    c.classList.toggle("off", !state.continents.has(c.dataset.cont));
+  });
+
+  let filtered = DATA.filter(d =>
+    state.continents.has(d.continent) &&
+    d.country.toLowerCase().includes(state.query)
+  );
+
+  filtered.sort((a,b) => state.dir === "desc" ? b[metric.key]-a[metric.key] : a[metric.key]-b[metric.key]);
+
+  const maxVal = Math.max(...DATA.map(d => d[metric.key]));
+
+  rowsEl.innerHTML = "";
+  emptyMsg.style.display = filtered.length ? "none" : "block";
+
+  filtered.forEach((d, idx) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    const pct = (d[metric.key] / maxVal * 100).toFixed(1);
+    const color = CONTINENT_COLORS[d.continent];
+
+    row.innerHTML = `
+      <div class="rank">${idx+1}</div>
+      <div class="country"><span class="dot" style="background:${color}"></span><span class="name">${d.country}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
+      <div class="value">${metric.fmt(d[metric.key])}</div>
+    `;
+
+    row.addEventListener("mousemove", (e) => {
+      tip.innerHTML = `
+        <b>${d.country}</b> · ${d.continent}
+        <div class="tip-row"><span>Egg price</span><span>$${d.eggPrice.toFixed(2)} / dz</span></div>
+        <div class="tip-row"><span>Min. wage</span><span>$${d.minWage.toLocaleString()} / mo</span></div>
+        <div class="tip-row"><span>Buying power</span><span>${d.buyingPower.toLocaleString()} dz / mo</span></div>
+        <div class="tip-row"><span>Days of wage / dz</span><span>${d.daysForDozen}</span></div>
+        <div class="tip-row"><span>Wage basis</span><span>${d.wageStatus}</span></div>
+      `;
+      tip.style.left = Math.min(e.clientX + 16, window.innerWidth - 260) + "px";
+      tip.style.top = Math.max(e.clientY - 50, 10) + "px";
+      tip.classList.add("show");
+    });
+    row.addEventListener("mouseleave", () => tip.classList.remove("show"));
+
+    rowsEl.appendChild(row);
+  });
+}
+
+document.getElementById("sortSeg").addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  state.sort = btn.dataset.sort;
+  document.querySelectorAll("#sortSeg button").forEach(b => b.classList.toggle("active", b===btn));
+  render();
+});
+
+document.getElementById("dirToggle").addEventListener("click", (e) => {
+  const el = e.currentTarget;
+  state.dir = state.dir === "desc" ? "asc" : "desc";
+  el.classList.toggle("desc", state.dir === "desc");
+  document.getElementById("dirLabel").textContent = state.dir === "desc" ? "Highest first" : "Lowest first";
+  render();
+});
+
+document.getElementById("search").addEventListener("input", (e) => {
+  state.query = e.target.value.trim().toLowerCase();
+  render();
+});
+
+buildChips();
+render();
+</script>
+
+</body>
+</html>
